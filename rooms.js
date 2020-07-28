@@ -80,8 +80,8 @@ const rooms = (() => {
                 });
                 return m;
             };
-            const m = message.edit(getPieces(message, over));
-            if (turn*1 === messages.indexOf(message)) {
+            const m = message.edit({ embed: {description: getPieces(message, over)}} );
+            if ((turn*1)%messages.length === messages.indexOf(message)) {
                 m.then(awaitReactions);
             }
             m.then(react);
