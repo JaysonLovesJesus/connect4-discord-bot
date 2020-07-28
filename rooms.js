@@ -58,7 +58,7 @@ const rooms = (() => {
             },
             awaitReactions = m => {
                 if (over) return m;
-                m.awaitReactions(filter, { max: 1, time: 1000*60*2, errors: ['time'] })
+                m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ['time'] })
                 .then(collected => {
                     const reaction = collected.first(),
                     x = reactions.indexOf(reaction.emoji.name);
