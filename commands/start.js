@@ -4,8 +4,6 @@ module.exports = {
     usage: ["@user"],
     aliases: ["s"],
 	execute(message, [id]) {
-        const room = message.client.rooms.create(message);
-        room.addPlayer(message.author.id);
         if (id) {
             const { user } = message.guild.members.cache.get(id.replace(/[^0-9]/g, ""));
             if (!user) return message.channel.send(`Couldn't find user ${id}`);
@@ -15,6 +13,8 @@ module.exports = {
                     .then(collected => {
                         const reaction = collected.first(); 
                         if (reaction.emoji.name === "👍") {
+                            const room = message.client.rooms.create(message);
+                            room.addPlayer(message.author.id);
                             room.addPlayer(user.id);
                             room.addMessage(msg);
                             room.updateMessages(0, true);
