@@ -59,17 +59,19 @@ const rooms = (() => {
             awaitReactions = m => {
                 if (over) return m;
                 m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ['time'] })
-                .then(collected => {
+                .then(async collected => {
                     const reaction = collected.first(),
                     x = reactions.indexOf(reaction.emoji.name);
                     if (board[x].length > 6) return;
+                    const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.name === reaction.emoji.name).users;
                     try {
                         reaction.users.remove(players[turn*1]);
                     } catch(e) {}
                     addPiece(turn*1, x);
                     if (board[x].length >= 6) {
                         reactions.splice(x, 1);
-                        reaction.users.remove(message.client.user.id);
+                        await reaction.users.remove(message.client.user.id);
+                        await userReactions.remove(message.client.user.id);
                     }
                     turn = !turn;
                     updateMessages();
@@ -77,6 +79,7 @@ const rooms = (() => {
                 .catch(collected => {
                     updateMessages(!turn+1);
                     m.channel.send(`**Room ${id}** closed due to inactivity`);
+                    messages[(turn*1+1)%messages.length].channel.send(`**Room ${id}** closed due to inactivity`);
                 });
                 return m;
             };
