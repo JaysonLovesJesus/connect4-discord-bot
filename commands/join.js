@@ -18,7 +18,7 @@ module.exports = {
             room.addPlayer(message.author.id);
             message.channel.send("Joining...").then(msg => {
                 room.addMessage(msg);
-                room.updateMessages();
+                room.updateMessages(0, true);
             });
         }
 	}

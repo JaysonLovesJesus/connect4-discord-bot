@@ -43,25 +43,25 @@ const rooms = (() => {
             }
             return i === 42 ? 3 : 0;
         },
+        reactions = ["1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"],
+        filter = (reaction, user) => {
+            return reactions.includes(reaction.emoji.name) && players[turn*1] === user.id;
+        },
+        react = async msg => {
+            for (const i of reactions) {
+                await msg.react(i);
+            }
+            return msg;
+        },
         update = async (message, won) => {
             waiting.splice(waiting.indexOf(id), 1);
             const over = won || checkWin(),
-            reactions = ["1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"],
-            filter = (reaction, user) => {
-                return reactions.includes(reaction.emoji.name) && players[turn*1] === user.id;
-            },
-            react = async msg => {
-                for (const i of reactions) {
-                    await msg.react(i);
-                }
-                return msg;
-            },
             awaitReactions = m => {
                 if (over) return m;
                 m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ['time'] })
                 .then(async collected => {
                     const reaction = collected.first(),
-                    x = reactions.indexOf(reaction.emoji.name);
+                    x = ["1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"].indexOf(reaction.emoji.name);
                     if (board[x].length > 6) return;
                     const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.name === reaction.emoji.name).users;
                     try {
@@ -79,7 +79,9 @@ const rooms = (() => {
                 .catch(collected => {
                     updateMessages(!turn+1);
                     m.channel.send(`**Room ${id}** closed due to inactivity`);
-                    messages[(turn*1+1)%messages.length].channel.send(`**Room ${id}** closed due to inactivity`);
+                    if (messages.length-1) {
+                        messages[(turn*1+1)%messages.length].channel.send(`**Room ${id}** closed due to inactivity`);
+                    }
                 });
                 return m;
             };
@@ -87,13 +89,15 @@ const rooms = (() => {
             if ((turn*1)%messages.length === messages.indexOf(message)) {
                 m.then(awaitReactions);
             }
-            m.then(react);
             if (over) {
                 delete rooms[id];
             }
         },
-        updateMessages = (won) => {
-            for (const message of messages) update(message, won);
+        updateMessages = (won, first) => {
+            for (const message of messages) {
+                update(message, won);
+                if (first) react(message);
+            }
         },
         addPiece = (id, x) => {
             board[x].push(id);
@@ -110,8 +114,8 @@ const rooms = (() => {
                     s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : 2];
                 }
             }
-            s += `\n\n🔴 ${message.client.users.cache.get(players[0]).tag} **${over==3?"Tie":over?over-1?"Lost":"Won":turn?"Next":"Now"}**`;
-            s += `\n🔵 ${message.client.users.cache.get(players[1]).tag} **${over==3?"Tie":over?over-1?"Won":"Lost":turn?"Now":"Next"}**`;
+            s += `\n\n🔴 ${message.client.users.cache.get(players[0])} **${over==3?"Tie":over?over-1?"Lost":"Won":turn?"Next":"Now"}**`;
+            s += `\n🔵 ${message.client.users.cache.get(players[1])} **${over==3?"Tie":over?over-1?"Won":"Lost":turn?"Now":"Next"}**`;
             return s;
         },
         addPlayer = id => {
@@ -150,6 +154,9 @@ const rooms = (() => {
             }
         }, 1000*60*2);
         return r;
+    },
+    destroy = id => {
+        delete rooms[id];
     };
     return {
         get: id => {
@@ -158,6 +165,7 @@ const rooms = (() => {
         rooms: rooms,
         waiting: waiting,
         create: create,
+        destory: destroy,
     };
 })();
 module.exports = rooms;
