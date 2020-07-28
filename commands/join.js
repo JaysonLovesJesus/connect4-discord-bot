@@ -1,7 +1,8 @@
 module.exports = {
-	name: 'join',
-	description: 'Joins an open room.',
-    aliases: ['j'],
+	name: "join",
+	description: "Joins an open room from a given id, a random room, or the newest room if nothing is given.",
+    usage: ["", "<id>", "random"],
+    aliases: ["j"],
 	execute(message, [id]) {
         const rooms = message.client.rooms.waiting;
         if (!id) {

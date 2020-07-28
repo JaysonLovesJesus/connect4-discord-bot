@@ -48,6 +48,7 @@ const rooms = (() => {
             return reactions.includes(reaction.emoji.id) && players[turn*1] === user.id;
         },
         react = async msg => {
+            msg.reactions.removeAll();
             for (const i of reactions) {
                 await msg.react(i);
             }
@@ -112,8 +113,8 @@ const rooms = (() => {
                     s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : 2];
                 }
             }
-            s += `\n\n🔴 ${message.client.users.cache.get(players[0])} **${over==3?"Tie":over?over-1?"Lost":"Won":turn?"Next":"Now"}**`;
-            s += `\n🔵 ${message.client.users.cache.get(players[1])} **${over==3?"Tie":over?over-1?"Won":"Lost":turn?"Now":"Next"}**`;
+            s += `\n\n🔴 ${message.client.users.cache.get(players[0])} (${message.client.users.cache.get(players[0]).tag}) **${over==3?"Tie":over?over-1?"Lost":"Won":turn?"Next":"Now"}**`;
+            s += `\n🔵 ${message.client.users.cache.get(players[1])} (${message.client.users.cache.get(players[1]).tag}) **${over==3?"Tie":over?over-1?"Won":"Lost":turn?"Now":"Next"}**`;
             return s;
         },
         addPlayer = id => {
@@ -163,7 +164,7 @@ const rooms = (() => {
         rooms: rooms,
         waiting: waiting,
         create: create,
-        destory: destroy,
+        destroy: destroy,
     };
 })();
 module.exports = rooms;
