@@ -43,33 +43,31 @@ const rooms = (() => {
             }
             return i === 42 ? 3 : 0;
         },
-        reactions = ["1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"],
+        reactions = ["737794168063131770", "737794168277041162", "737794168436293695", "737794166716891279", "737794166800777246", "737794237742973059", "737794168096817233"],
         filter = (reaction, user) => {
-            return reactions.includes(reaction.emoji.name) && players[turn*1] === user.id;
+            return reactions.includes(reaction.emoji.id) && players[turn*1] === user.id;
         },
         react = async msg => {
             for (const i of reactions) {
                 await msg.react(i);
             }
-            return msg;
         },
         update = async (message, won) => {
             waiting.splice(waiting.indexOf(id), 1);
             const over = won || checkWin(),
             awaitReactions = m => {
                 if (over) return m;
-                m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ['time'] })
+                m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ["time"] })
                 .then(async collected => {
                     const reaction = collected.first(),
-                    x = ["1⃣", "2⃣", "3⃣", "4⃣", "5⃣", "6⃣", "7⃣"].indexOf(reaction.emoji.name);
+                    x = reactions.indexOf(reaction.emoji.id);
                     if (board[x].length > 6) return;
-                    const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.name === reaction.emoji.name).users;
+                    const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.id === reaction.emoji.id).users;
                     try {
                         reaction.users.remove(players[turn*1]);
                     } catch(e) {}
                     addPiece(turn*1, x);
                     if (board[x].length >= 6) {
-                        reactions.splice(x, 1);
                         await reaction.users.remove(message.client.user.id);
                         await userReactions.remove(message.client.user.id);
                     }
@@ -107,7 +105,7 @@ const rooms = (() => {
         },
         getPieces = (message, over) => {
             const pieces = ["🔴","🔵","⚫"];
-            let s = `**Room ${id}**\n1⃣2⃣3⃣4⃣5⃣6⃣7⃣`;
+            let s = `**Room ${id}**\n<:1_:737794168063131770><:2_:737794168277041162><:3_:737794168436293695><:4_:737794166716891279><:5_:737794166800777246><:6_:737794237742973059><:7_:737794168096817233>`;
             for (let y = 5; y >= 0; y --) {
                 s += "\n";
                 for (let x = 0; x < 7; x ++) {
