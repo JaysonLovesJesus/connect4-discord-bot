@@ -11,7 +11,7 @@ module.exports = {
             .setTitle("Here's a list of my commands");
 
             commands.forEach(command => {
-                embed.addField(command.name, command.description);
+                embed.addField(message.client.prefix+command.name, command.description);
             });
     
             return message.channel.send(embed);
