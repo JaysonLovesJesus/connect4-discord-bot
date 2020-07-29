@@ -6,7 +6,7 @@ module.exports = {
 	execute(message, [id]) {
         const rooms = message.client.rooms.rooms;
         if (!id) {
-            if (!rooms) return message.channel.send(`There isn't any open rooms`);
+            if (!Object.keys(rooms).length) return message.channel.send(`There isn't any open rooms`);
             const embed = new message.client.embed()
             .setColor("#4287f5")
             .setTitle("Curretly Active Rooms");
@@ -16,8 +16,8 @@ module.exports = {
             }
             return message.channel.send(embed);
         } else if (id === "random") {
-            if (!rooms) return message.channel.send(`There isn't any open rooms`);
             const keys = Object.keys(rooms);
+            if (!keys) return message.channel.send(`There isn't any open rooms`);
             id = keys[Math.floor(Math.random()*keys.length)];
         }
         const room = message.client.rooms.get(id);
