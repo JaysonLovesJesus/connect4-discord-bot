@@ -8,8 +8,7 @@ module.exports = {
         if (!id) {
             if (!rooms.length) return message.channel.send(`There isn't any open rooms`);
             id = rooms[rooms.length-1];
-        }
-        else if (id === "random") {
+        } else if (id === "random") {
             if (!rooms.length) return message.channel.send(`There isn't any open rooms`);
             id = rooms[Math.floor(Math.random()*rooms.length)];
         }

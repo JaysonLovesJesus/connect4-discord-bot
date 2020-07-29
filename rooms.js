@@ -54,7 +54,7 @@ const rooms = (() => {
                 await msg.react(i);
             }
         },
-        update = async (message, won, spectating) => {
+        update = async (msg, won) => {
             waiting.splice(waiting.indexOf(id), 1);
             const over = won || checkWin(),
             awaitReactions = m => {
@@ -70,36 +70,37 @@ const rooms = (() => {
                     } catch(e) {}
                     addPiece(turn*1, x);
                     if (board[x].length >= 6) {
-                        await reaction.users.remove(message.client.user.id);
-                        await userReactions.remove(message.client.user.id);
+                        await reaction.users.remove(m.client.user.id);
+                        await userReactions.remove(m.client.user.id);
                     }
                     turn = !turn;
                     updateMessages();
                 })
                 .catch(collected => {
-                    updateMessages(!turn+1);
-                    m.channel.send(`**Room ${id}** closed due to inactivity`);
-                    if (messages.length-1) {
-                        messages[(turn*1+1)%messages.length].channel.send(`**Room ${id}** closed due to inactivity`);
-                    }
+                    updateMessages(4);
                 });
                 return m;
             };
-            const m = message.edit(getPieces(message, over));
-            if (!spectating && (turn*1)%messages.length === messages.indexOf(message)) {
+            const m = msg.edit(getPieces(msg, over));
+            if ((turn*1)%messages.length === messages.indexOf(msg)) {
                 m.then(awaitReactions);
             }
             if (over) {
                 delete rooms[id];
             }
         },
-        updateMessages = (won, first) => {
-            for (const message of messages) {
-                update(message, won);
-                if (first) react(message);
+        updateSpectate = (msg, won) => {
+            msg.edit(getPieces(msg, won || checkWin()));
+        },
+        updateMessages = (won, first, spectate) => {
+            if (!spectate) {
+                for (const msg of messages) {
+                    update(msg, won);
+                    if (first) react(msg);
+                }
             }
-            for (const message of spectators) {
-                update(message, won);
+            for (const spectator of spectators) {
+                updateSpectate(spectator, won);
             }
         },
         addPiece = (id, x) => {
@@ -108,7 +109,17 @@ const rooms = (() => {
         getPiece = (x, y) => {
             return board[x][y];
         },
-        getPieces = (message, over) => {
+        getPieces = (msg, over) => {
+            let status = [];
+            if (!over) {
+                status = turn ? ["Next", "Now"] : ["Now", "Next"];
+            } else if (over < 3) {
+                status = over-1 ? ["Lost", "Won"] : ["Won", "Lost"];
+            } else if (over === 3) {
+                status = ["Tie", "Tie"]
+            } else {
+                status = turn ? ["Won | Timeout", "Lost | Timeout"] : ["Lost | Timeout", "Won | Timeout"];
+            }
             const pieces = ["🔴","🔵","⚫"];
             let s = `**Room ${id}**\n<:1_:737794168063131770><:2_:737794168277041162><:3_:737794168436293695><:4_:737794166716891279><:5_:737794166800777246><:6_:737794237742973059><:7_:737794168096817233>`;
             for (let y = 5; y >= 0; y --) {
@@ -117,8 +128,8 @@ const rooms = (() => {
                     s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : 2];
                 }
             }
-            s += `\n\n🔴 ${message.client.users.cache.get(players[0])} (${message.client.users.cache.get(players[0]).tag}) **${over==3?"Tie":over?over-1?"Lost":"Won":turn?"Next":"Now"}**`;
-            s += `\n🔵 ${message.client.users.cache.get(players[1])} (${message.client.users.cache.get(players[1]).tag}) **${over==3?"Tie":over?over-1?"Won":"Lost":turn?"Now":"Next"}**`;
+            s += `\n\n🔴 ${msg.client.users.cache.get(players[0])} (${msg.client.users.cache.get(players[0]).tag}) **${status[0]}**`;
+            s += `\n🔵 ${msg.client.users.cache.get(players[1])} (${msg.client.users.cache.get(players[1]).tag}) **${status[1]}**`;
             return s;
         },
         addPlayer = id => {
@@ -127,11 +138,11 @@ const rooms = (() => {
         addSpectator = message => {
             spectators.push(message);
         },
-        addMessage = message => {
-            if (messages.length && message.channel.id === messages[0].channel.id) {
+        addMessage = msg => {
+            if (messages.length && msg.channel.id === messages[0].channel.id) {
                 messages.splice(0, 1);
             }
-            messages.push(message);
+            messages.push(msg);
         };
         return {
             get id() {
