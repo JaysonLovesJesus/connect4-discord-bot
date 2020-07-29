@@ -2,6 +2,7 @@ const { Message } = require("discord.js");
 
 const rooms = (() => {
     const rooms = {},
+    waiting = [],
     room = (id => {
         let turn = false;
         const players = [],
@@ -54,6 +55,7 @@ const rooms = (() => {
             }
         },
         update = async (message, won, spectating) => {
+            waiting.splice(waiting.indexOf(id), 1);
             const over = won || checkWin(),
             awaitReactions = m => {
                 if (over) return m;
@@ -97,7 +99,7 @@ const rooms = (() => {
                 if (first) react(message);
             }
             for (const message of spectators) {
-                update(message, won, true);
+                update(message, won);
             }
         },
         addPiece = (id, x) => {
@@ -150,9 +152,11 @@ const rooms = (() => {
         const id = Math.random().toString(36).slice(2, 6).toUpperCase(),
             r = room(id);
         rooms[id] = r;
+        waiting.push(id);
         setTimeout(() => {
             if (rooms[id] && rooms[id].players.length < 2) {
                 delete rooms[id];
+                waiting.splice(waiting.indexOf(id), 1);
                 message.channel.send(`**Room ${id}** closed due to inactivity`);
             }
         }, 1000*60*2);
@@ -166,6 +170,7 @@ const rooms = (() => {
             return rooms[id.toUpperCase()];
         },
         rooms: rooms,
+        waiting: waiting,
         create: create,
         destroy: destroy,
     };
