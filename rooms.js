@@ -2,11 +2,11 @@ const { Message } = require("discord.js");
 
 const rooms = (() => {
     const rooms = {},
-    waiting = [],
     room = (id => {
         let turn = false;
         const players = [],
         messages = [],
+        spectators = [],
         board = [
             [],
             [],
@@ -53,8 +53,7 @@ const rooms = (() => {
                 await msg.react(i);
             }
         },
-        update = async (message, won) => {
-            waiting.splice(waiting.indexOf(id), 1);
+        update = async (message, won, spectating) => {
             const over = won || checkWin(),
             awaitReactions = m => {
                 if (over) return m;
@@ -85,7 +84,7 @@ const rooms = (() => {
                 return m;
             };
             const m = message.edit(getPieces(message, over));
-            if ((turn*1)%messages.length === messages.indexOf(message)) {
+            if (!spectating && (turn*1)%messages.length === messages.indexOf(message)) {
                 m.then(awaitReactions);
             }
             if (over) {
@@ -96,6 +95,9 @@ const rooms = (() => {
             for (const message of messages) {
                 update(message, won);
                 if (first) react(message);
+            }
+            for (const message of spectators) {
+                update(message, won, true);
             }
         },
         addPiece = (id, x) => {
@@ -120,6 +122,9 @@ const rooms = (() => {
         addPlayer = id => {
             players.push(id);
         },
+        addSpectator = message => {
+            spectators.push(message);
+        },
         addMessage = message => {
             if (messages.length && message.channel.id === messages[0].channel.id) {
                 messages.splice(0, 1);
@@ -134,6 +139,7 @@ const rooms = (() => {
             update: update,
             updateMessages: updateMessages,
             addPlayer: addPlayer,
+            addSpectator: addSpectator,
             addMessage: addMessage,
             addPiece: addPiece,
             getPieces: getPieces,
@@ -144,11 +150,9 @@ const rooms = (() => {
         const id = Math.random().toString(36).slice(2, 6).toUpperCase(),
             r = room(id);
         rooms[id] = r;
-        waiting.push(id);
         setTimeout(() => {
             if (rooms[id] && rooms[id].players.length < 2) {
                 delete rooms[id];
-                waiting.splice(waiting.indexOf(id), 1);
                 message.channel.send(`**Room ${id}** closed due to inactivity`);
             }
         }, 1000*60*2);
@@ -162,7 +166,6 @@ const rooms = (() => {
             return rooms[id.toUpperCase()];
         },
         rooms: rooms,
-        waiting: waiting,
         create: create,
         destroy: destroy,
     };
