@@ -17,7 +17,7 @@ module.exports = {
             return message.channel.send(embed);
         } else if (id === "random") {
             const keys = Object.keys(rooms);
-            if (!keys) return message.channel.send(`There isn't any open rooms`);
+            if (!keys.length) return message.channel.send(`There isn't any open rooms`);
             id = keys[Math.floor(Math.random()*keys.length)];
         }
         const room = message.client.rooms.get(id);
