@@ -4,7 +4,7 @@ const rooms = (() => {
     const rooms = {},
     waiting = [],
     room = (id => {
-        let turn = false;
+        let turn = false, x;
         const players = [],
         messages = [],
         spectators = [],
@@ -61,7 +61,7 @@ const rooms = (() => {
                 if (over) return m;
                 m.awaitReactions(filter, { max: 1, time: 1000*60*3, errors: ["time"] })
                 .then(async collected => {
-                    const reaction = collected.first(),
+                    const reaction = collected.first();
                     x = reactions.indexOf(reaction.emoji.id);
                     if (board[x].length > 6) return;
                     const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.id === reaction.emoji.id).users;
@@ -81,7 +81,7 @@ const rooms = (() => {
                 });
                 return m;
             };
-            const m = msg.edit(getPieces(msg, over));
+            const m = msg.edit(getPieces(msg, over, x));
             if ((turn*1)%messages.length === messages.indexOf(msg)) {
                 m.then(awaitReactions);
             }
@@ -109,7 +109,8 @@ const rooms = (() => {
         getPiece = (x, y) => {
             return board[x][y];
         },
-        getPieces = (msg, over) => {
+        getPieces = (msg, over, X) => {
+            console.log(X);
             let status = [];
             if (!over) {
                 status = turn ? ["Next", "Now"] : ["Now", "Next"];
@@ -120,7 +121,7 @@ const rooms = (() => {
             } else {
                 status = turn ? ["Won | Timeout", "Lost | Timeout"] : ["Lost | Timeout", "Won | Timeout"];
             }
-            const pieces = ["<:red:738916010480107582>","<:yellow:738916010673045555>","<:blue:738916280937086996>"];
+            const pieces = ["<:red:738916010480107582>","<:yellow:738916010673045555>","<:blue:738916280937086996>","<:blue2:738939883221024792>"];
             let s = `**Room ${id}**\n`;
             s += turn
                 ? "<:yellowone:738936333397131325><:yellowtwo:738936333413908503><:yellowthree:738936333711573022><:yellowfour:738936333317439580><:yellowfive:738936333824819251><:yellowsix:738936333476823122><:yellowseven:738936333636075570>"
@@ -128,7 +129,7 @@ const rooms = (() => {
             for (let y = 5; y >= 0; y --) {
                 s += "\n";
                 for (let x = 0; x < 7; x ++) {
-                    s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : 2];
+                    s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : X == x ? 3 : 2];
                 }
             }
             s += `\n\n<:red2:738916825290768455> ${msg.client.users.cache.get(players[0])} (${msg.client.users.cache.get(players[0]).tag}) **${status[0]}**`;
