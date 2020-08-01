@@ -44,7 +44,7 @@ const rooms = (() => {
             }
             return i === 42 ? 3 : 0;
         },
-        reactions = ["737794168063131770", "737794168277041162", "737794168436293695", "737794166716891279", "737794166800777246", "737794237742973059", "737794168096817233"],
+        reactions = ["738941283875422249", "738941284353441792", "738941283728359456", "738941283682484315", "738941283640410173", "738941284097589312", "738941283896262706"],
         filter = (reaction, user) => {
             return reactions.includes(reaction.emoji.id) && players[turn*1] === user.id;
         },
@@ -120,16 +120,19 @@ const rooms = (() => {
             } else {
                 status = turn ? ["Won | Timeout", "Lost | Timeout"] : ["Lost | Timeout", "Won | Timeout"];
             }
-            const pieces = ["🔴","🔵","⚫"];
-            let s = `**Room ${id}**\n<:1_:737794168063131770><:2_:737794168277041162><:3_:737794168436293695><:4_:737794166716891279><:5_:737794166800777246><:6_:737794237742973059><:7_:737794168096817233>`;
+            const pieces = ["<:red:738916010480107582>","<:yellow:738916010673045555>","<:blue:738916280937086996>"];
+            let s = `**Room ${id}**\n`;
+            s += turn
+                ? "<:yellowone:738936333397131325><:yellowtwo:738936333413908503><:yellowthree:738936333711573022><:yellowfour:738936333317439580><:yellowfive:738936333824819251><:yellowsix:738936333476823122><:yellowseven:738936333636075570>"
+                : "<:redone:738936330964303943><:redtwo:738936333640400917><:redthree:738936333841596516><:redfour:738936330901520494><:redfive:738936330414981122><:redsix:738936333774356580><:redseven:738936332927369306>"
             for (let y = 5; y >= 0; y --) {
                 s += "\n";
                 for (let x = 0; x < 7; x ++) {
                     s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : 2];
                 }
             }
-            s += `\n\n🔴 ${msg.client.users.cache.get(players[0])} (${msg.client.users.cache.get(players[0]).tag}) **${status[0]}**`;
-            s += `\n🔵 ${msg.client.users.cache.get(players[1])} (${msg.client.users.cache.get(players[1]).tag}) **${status[1]}**`;
+            s += `\n\n<:red2:738916825290768455> ${msg.client.users.cache.get(players[0])} (${msg.client.users.cache.get(players[0]).tag}) **${status[0]}**`;
+            s += `\n<:yellow2:738916825768919080> ${msg.client.users.cache.get(players[1])} (${msg.client.users.cache.get(players[1]).tag}) **${status[1]}**`;
             return s;
         },
         addPlayer = id => {
