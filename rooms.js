@@ -3,7 +3,9 @@ const { Message } = require("discord.js");
 const rooms = (() => {
     const rooms = {},
     waiting = [],
-    room = (id => {
+    room = ((id, w, h) => {
+        w = isNaN(w*1) ? 7 : w;
+        h = isNaN(h*1) ? 6 : h;
         let turn = false, x;
         const players = [],
         messages = [],
@@ -16,7 +18,10 @@ const rooms = (() => {
             [],
             [],
             [],
-        ],
+            [],
+            [],
+            [],
+        ].slice(0, w),
         checkWin = () => {
             const check = (x, y, stepX, stepY) => {
                 let X = x, Y = y, j = 1;
@@ -31,7 +36,7 @@ const rooms = (() => {
                 return j === 1 ? 1 : j === 16 ? 2 : 0;
             };
             let i = 0;
-            for (let x = 0; x < 7; x ++) {
+            for (let x = 0; x < board.length; x ++) {
                 if (board[x].length) {
                     i += board[x].length;
                     for (let y = 0; y < board[x].length; y ++) {
@@ -44,7 +49,9 @@ const rooms = (() => {
             }
             return i === 42 ? 3 : 0;
         },
-        reactions = ["738941283875422249", "738941284353441792", "738941283728359456", "738941283682484315", "738941283640410173", "738941284097589312", "738941283896262706"],
+        reactions = ["739235876785356811", "739235877133221998", "739235877271765123", "739235876135239699", "739235876399480894", "739235877124833361", "739235876814585858", "739235876135108698", "739235876416127018", "739235877410045972"].slice(0, w),
+        redReactions = ["738936330964303943", "738936333640400917", "738936333841596516", "738936330901520494", "738936330414981122", "738936333774356580", "738936332927369306", "739231139188703340", "739231141479055482", "739231145945727066"].slice(0, w),
+        yellowReactions = ["738936333397131325", "738936333413908503", "738936333711573022", "738936333317439580", "738936333824819251", "738936333476823122", "738936333636075570", "739231145899720764", "739231145497067591", "739231145811640474"].slice(0, w),
         filter = (reaction, user) => {
             return reactions.includes(reaction.emoji.id) && players[turn*1] === user.id;
         },
@@ -63,13 +70,13 @@ const rooms = (() => {
                 .then(async collected => {
                     const reaction = collected.first();
                     x = reactions.indexOf(reaction.emoji.id);
-                    if (board[x].length > 6) return;
+                    if (board[x].length > h) return;
                     const userReactions = messages[(turn*1+1)%messages.length].reactions.cache.find(r => r.emoji.id === reaction.emoji.id).users;
                     try {
                         reaction.users.remove(players[turn*1]);
                     } catch(e) {}
                     addPiece(turn*1, x);
-                    if (board[x].length >= 6) {
+                    if (board[x].length >= h) {
                         await reaction.users.remove(m.client.user.id);
                         await userReactions.remove(m.client.user.id);
                     }
@@ -110,7 +117,6 @@ const rooms = (() => {
             return board[x][y];
         },
         getPieces = (msg, over, X) => {
-            console.log(X);
             let status = [];
             if (!over) {
                 status = turn ? ["Next", "Now"] : ["Now", "Next"];
@@ -124,11 +130,11 @@ const rooms = (() => {
             const pieces = ["<:red:738916010480107582>","<:yellow:738916010673045555>","<:blue:738916280937086996>","<:blue2:738939883221024792>"];
             let s = `**Room ${id}**\n`;
             s += turn
-                ? "<:yellowone:738936333397131325><:yellowtwo:738936333413908503><:yellowthree:738936333711573022><:yellowfour:738936333317439580><:yellowfive:738936333824819251><:yellowsix:738936333476823122><:yellowseven:738936333636075570>"
-                : "<:redone:738936330964303943><:redtwo:738936333640400917><:redthree:738936333841596516><:redfour:738936330901520494><:redfive:738936330414981122><:redsix:738936333774356580><:redseven:738936332927369306>"
-            for (let y = 5; y >= 0; y --) {
+                ? `<:a:${yellowReactions.join("><:a:")}>`
+                : `<:a:${redReactions.join("><:a:")}>`
+            for (let y = h-1; y >= 0; y --) {
                 s += "\n";
-                for (let x = 0; x < 7; x ++) {
+                for (let x = 0; x < w; x ++) {
                     s += pieces[getPiece(x, y)+1 ? getPiece(x, y) : X == x ? 3 : 2];
                 }
             }
@@ -163,9 +169,9 @@ const rooms = (() => {
             create: create
         };
     }),
-    create = message => {
+    create = (message, w, h) => {
         const id = Math.random().toString(36).slice(2, 6).toUpperCase(),
-            r = room(id);
+            r = room(id, w, h);
         rooms[id] = r;
         waiting.push(id);
         setTimeout(() => {

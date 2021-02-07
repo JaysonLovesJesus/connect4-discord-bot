@@ -6,10 +6,10 @@ module.exports = {
 	execute(message, [id]) {
         const rooms = message.client.rooms.waiting;
         if (!id) {
-            if (!rooms.length) return message.channel.send(`There isn't any open rooms`);
+            if (!rooms.length) return message.channel.send(`There aren't any open rooms`);
             id = rooms[rooms.length-1];
         } else if (id === "random") {
-            if (!rooms.length) return message.channel.send(`There isn't any open rooms`);
+            if (!rooms.length) return message.channel.send(`There aren't any open rooms`);
             id = rooms[Math.floor(Math.random()*rooms.length)];
         }
         const room = message.client.rooms.get(id);

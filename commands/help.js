@@ -9,7 +9,8 @@ module.exports = {
         if (!args.length) {
             const embed = new message.client.embed()
             .setColor("#4287f5")
-            .setTitle("Here's a list of my commands");
+            .setTitle("Here's a list of my commands")
+            .setFooter(`Made by JSON#8975`, "https://cdn.discordapp.com/avatars/359988404316012547/ba538e9e7118a35166d071daa9e23f74.png");
 
             commands.forEach(command => {
                 embed.addField(message.client.prefix+command.name, command.description);
@@ -25,9 +26,10 @@ module.exports = {
         const embed = new message.client.embed()
         .setColor("#4287f5")
         .setTitle(command.name.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()))
-        .addField(`Aliases`, command.aliases.join(", "))
         .addField(`Description`, command.description)
-        .addField(`Usage`, message.client.prefix+command.name+" "+command.usage.join(", "+message.client.prefix+command.name+" "));
+        .setFooter(`Made by JSON#8975`, "https://cdn.discordapp.com/avatars/359988404316012547/ba538e9e7118a35166d071daa9e23f74.png");
+        if (command.aliases.length) embed.addField(`Aliases`, command.aliases.join(", "))
+        if (command.usage.length) embed.addField(`Usage`, message.client.prefix+command.name+" "+command.usage.join("\n"+message.client.prefix+command.name+" "))
         message.channel.send(embed);
 	},
 };
